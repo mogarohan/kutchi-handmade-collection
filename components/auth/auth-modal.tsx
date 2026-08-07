@@ -1,0 +1,183 @@
+"use client";
+
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { signIn, signUp, signOut } from "@/app/actions/auth";
+import { Loader2, CheckCircle2 } from "lucide-react";
+
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+  defaultMode?: "login" | "register";
+}
+
+export function AuthModal({ isOpen, onClose, onSuccess, defaultMode = "login" }: AuthModalProps) {
+  const [mode, setMode] = useState<"login" | "register">(defaultMode);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      if (mode === "register") {
+        if (!name.trim()) {
+          throw new Error("Name is required");
+        }
+        if (password !== confirmPassword) {
+          throw new Error("Passwords do not match");
+        }
+        const res = await signUp(email, password, name);
+        if (res.error) throw new Error(res.error);
+        
+        // Sign out immediately because Supabase auto-logs in users when email confirmation is disabled
+        await signOut();
+
+        setIsSuccess(true);
+        setTimeout(() => {
+          setMode("login");
+          setPassword("");
+          setConfirmPassword("");
+          setIsSuccess(false);
+        }, 1500);
+      } else {
+        const res = await signIn(email, password);
+        if (res.error) throw new Error(res.error);
+        
+        setIsSuccess(true);
+        setTimeout(() => {
+          if (onSuccess) onSuccess();
+          onClose();
+          setTimeout(() => setIsSuccess(false), 500);
+        }, 1500);
+      }
+    } catch (err: any) {
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold font-heading text-primary">
+            {mode === "login" ? "Welcome Back" : "Create an Account"}
+          </DialogTitle>
+        </DialogHeader>
+        
+        {isSuccess ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center space-y-4 animate-in fade-in zoom-in duration-300">
+            <CheckCircle2 className="w-16 h-16 text-green-500" />
+            <h3 className="text-xl font-bold text-gray-900">
+              {mode === "login" ? "Successfully Logged In!" : "Successfully Registered!"}
+            </h3>
+            <p className="text-sm text-gray-500">Redirecting you...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+            {error && (
+              <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+                {error}
+              </div>
+            )}
+            
+            {mode === "register" && (
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input 
+                  id="name" 
+                  placeholder="John Doe" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required={mode === "register"} 
+                />
+              </div>
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="hello@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input 
+                id="password" 
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required 
+                minLength={6}
+              />
+            </div>
+
+            {mode === "register" && (
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input 
+                  id="confirmPassword" 
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required={mode === "register"} 
+                  minLength={6}
+                />
+              </div>
+            )}
+            
+            <Button type="submit" className="w-full h-11 text-base font-medium" disabled={loading}>
+              {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (mode === "login" ? "Login" : "Register")}
+            </Button>
+            
+            <div className="text-center text-sm text-muted-foreground mt-4">
+              {mode === "login" ? (
+                <p>
+                  Don't have an account?{" "}
+                  <button 
+                    type="button" 
+                    onClick={() => { setMode("register"); setError(""); }}
+                    className="text-primary font-semibold hover:underline"
+                  >
+                    Sign up
+                  </button>
+                </p>
+              ) : (
+                <p>
+                  Already have an account?{" "}
+                  <button 
+                    type="button" 
+                    onClick={() => { setMode("login"); setError(""); }}
+                    className="text-primary font-semibold hover:underline"
+                  >
+                    Log in
+                  </button>
+                </p>
+              )}
+            </div>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}

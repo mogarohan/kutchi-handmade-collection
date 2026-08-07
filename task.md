@@ -1,0 +1,9 @@
+- `[ ]` 1. Install and configure `sonner` (Toast Notifications)
+- `[ ]` 2. Add `<Toaster />` to main layout
+- `[ ]` 3. Implement Toasts in Admin Settings
+- `[ ]` 4. Implement Toasts in Manual Order Form
+- `[ ]` 5. Implement Toasts in Frontend Checkout
+- `[ ]` 6. Add `user_id` tracking logic to Checkout (so users own their orders)
+- `[ ]` 7. Create `/my-orders` page on the frontend
+- `[ ]` 8. Add "Cancel Order" action to frontend
+- `[ ]` 9. Ensure `Cancelled` status is visible and styled in Admin Panel
