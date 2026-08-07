@@ -110,7 +110,7 @@ export default async function HomePage() {
               {categories.map((category) => (
                 <Link href={`/products?category=${category.slug}`} key={category.id} className="group flex flex-col items-center gap-6 w-40 md:w-56">
                   {/* Arch Shaped Image Container */}
-                  <div className="w-full aspect-[3/4] rounded-[60px] rounded-t-[120px] overflow-hidden border-4 border-[#f3efe8] bg-white shadow-[0_10px_40px_rgba(124,45,18,0.08)] transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_20px_50px_rgba(124,45,18,0.15)] group-hover:border-[#7C2D12]/20">
+                  <div className="w-full aspect-[3/4] rounded-[60px] rounded-t-[120px] overflow-hidden border-[6px] border-[#7C2D12] bg-white shadow-[0_10px_40px_rgba(124,45,18,0.08)] transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_20px_50px_rgba(124,45,18,0.25)] group-hover:border-[#7C2D12]">
                     <div className="w-full h-full bg-muted">
                       {category.image_url ? (
                         <img

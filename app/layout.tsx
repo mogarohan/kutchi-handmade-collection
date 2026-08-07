@@ -25,6 +25,7 @@ export const metadata: Metadata = {
 import { CartProvider } from "@/contexts/cart-context";
 import { CartSidebar } from "@/components/ui/cart-sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { ScrollToTop } from "@/components/layout/scroll-to-top";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-full flex flex-col overflow-x-hidden">
         <CartProvider>
+          <ScrollToTop />
           {children}
           <CartSidebar />
           <Toaster />

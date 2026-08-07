@@ -79,7 +79,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       </div>
 
-      <CardContent className="relative z-10 p-5 md:p-6 flex flex-col flex-1 bg-background pointer-events-none">
+      <CardContent className="relative z-10 p-3 sm:p-5 md:p-6 flex flex-col flex-1 bg-background pointer-events-none">
         <div className="text-center">
           <p className="mb-2 text-xs font-bold uppercase tracking-widest text-primary/70">
             {product.category}
@@ -88,7 +88,7 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </h3>
           <div className="mt-3 flex items-center justify-center gap-3">
-            <span className="font-sans text-lg font-semibold text-primary">₹{product.sale_price}</span>
+            <span className="font-sans text-base sm:text-lg font-semibold text-primary">₹{product.sale_price}</span>
             {product.original_price > 0 && (
               <span className="font-sans text-sm text-muted-foreground line-through">₹{product.original_price}</span>
             )}
@@ -96,15 +96,15 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Action Buttons directly on the card */}
-        <div className="mt-auto pt-6 flex gap-2 pointer-events-auto relative z-30">
+        <div className="mt-auto pt-4 sm:pt-6 flex gap-2 pointer-events-auto relative z-30">
           <Button 
-            className="flex-1 gap-2 rounded-xl h-11 bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md text-sm md:text-base font-semibold"
+            className="flex-1 gap-1.5 sm:gap-2 rounded-xl h-9 sm:h-11 px-2 sm:px-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md text-xs sm:text-sm md:text-base font-semibold"
             onClick={handleQuickAdd}
           >
-            <ShoppingCart size={18} className="shrink-0" />
+            <ShoppingCart size={16} className="shrink-0 sm:w-[18px] sm:h-[18px]" />
             Add to Cart
           </Button>
-          <Link href={`/product/${product.slug}`} className="shrink-0" onClick={(e) => e.stopPropagation()}>
+          <Link href={`/product/${product.slug}`} className="shrink-0 hidden sm:block" onClick={(e) => e.stopPropagation()}>
             <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl hover:bg-primary hover:text-primary-foreground transition-all">
               <Eye size={18} />
             </Button>
