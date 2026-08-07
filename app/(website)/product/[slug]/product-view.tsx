@@ -78,18 +78,7 @@ export default function ProductView({ product, whatsappNumberSetting }: ProductV
             )}
           </div>
 
-        {/* Action Buttons Below Image (Desktop Only) */}
-        <div className="hidden md:block bg-white p-4 rounded-xl border border-border/50 shadow-sm">
-          <WhatsAppOrderButton 
-            productName={product.name}
-            originalPrice={product.original_price} 
-            salePrice={product.sale_price} 
-            stock={product.stock}
-            productSlug={product.slug}
-            productImage={product.image_url || undefined}
-            whatsappNumber={whatsappNumberSetting.replace(/[^0-9]/g, '')}
-          />
-        </div>
+
       </div>
 
       {/* Right Column: Product Details & Thumbnails */}
@@ -118,18 +107,7 @@ export default function ProductView({ product, whatsappNumberSetting }: ProductV
           {product.description || "No description provided."}
         </p>
 
-        {/* Action Buttons (Mobile Only) */}
-        <div className="md:hidden mb-6 bg-white p-4 rounded-xl border border-border/50 shadow-sm">
-          <WhatsAppOrderButton 
-            productName={product.name} 
-            originalPrice={product.original_price}
-            salePrice={product.sale_price} 
-            stock={product.stock}
-            productSlug={product.slug}
-            productImage={product.image_url || undefined}
-            whatsappNumber={whatsappNumberSetting.replace(/[^0-9]/g, '')}
-          />
-        </div>
+
 
         {/* Thumbnails moved to Product Details Column */}
         {allImages.length > 1 && (
@@ -165,7 +143,18 @@ export default function ProductView({ product, whatsappNumberSetting }: ProductV
           </ul>
         </div>
 
-        {/* Removing WhatsAppOrderButton from here, moving it to the left column */}
+        {/* Action Buttons */}
+        <div className="mb-6 bg-white p-4 rounded-xl border border-border/50 shadow-sm">
+          <WhatsAppOrderButton 
+            productName={product.name} 
+            originalPrice={product.original_price}
+            salePrice={product.sale_price} 
+            stock={product.stock}
+            productSlug={product.slug}
+            productImage={product.image_url || undefined}
+            whatsappNumber={whatsappNumberSetting.replace(/[^0-9]/g, '')}
+          />
+        </div>
 
         <div className="mt-auto pt-8 border-t border-border">
           <div className="grid grid-cols-3 gap-4 text-center">
