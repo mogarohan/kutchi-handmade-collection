@@ -5,6 +5,8 @@ import { getCategories } from "@/app/actions/categories";
 import { getProducts } from "@/app/actions/products";
 import { ProductCard } from "@/components/ui/product-card";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const categories = await getCategories();
   const products = await getProducts(true); // only active products

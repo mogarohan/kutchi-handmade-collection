@@ -62,6 +62,11 @@ export default async function AdminCategoriesPage() {
                   <TableCell className="text-muted-foreground">{category.slug}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
+                      <Link href={`/admin/categories/${category.id}/edit`}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
+                          <Edit size={16} />
+                        </Button>
+                      </Link>
                       <form action={async () => {
                         "use server";
                         await deleteCategory(category.id);

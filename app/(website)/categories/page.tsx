@@ -7,6 +7,8 @@ export const metadata: Metadata = {
   description: "Explore our curated collections of authentic Kutchi handmade masterpieces, sorted by categories.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function CategoriesPage() {
   const categories = await getCategories();
 

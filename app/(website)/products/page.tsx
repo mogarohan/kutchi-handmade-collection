@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   description: "Browse our complete collection of premium handmade mirror work creations and accessories from Kutch.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductsPage({
   searchParams,
 }: {
