@@ -30,7 +30,10 @@ export default async function ProductsPage({
   // Filter by category if present in URL
   if (resolvedSearchParams.category) {
     products = products.filter(
-      (product) => product.category === resolvedSearchParams.category
+      (product) => {
+        const productCategorySlug = product.category?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+        return productCategorySlug === resolvedSearchParams.category;
+      }
     );
   }
 
