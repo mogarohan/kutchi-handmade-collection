@@ -6,6 +6,8 @@ import { getOrders } from "@/app/actions/orders";
 import { getCategories } from "@/app/actions/categories";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboardPage() {
   const products = await getProducts();
   const orders = await getOrders();

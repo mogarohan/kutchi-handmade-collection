@@ -35,10 +35,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <NavItem href="/admin/settings" icon={<Settings size={20} />} label="Settings" />
         </nav>
         <div className="p-4 border-t">
-          <button className="flex items-center gap-3 px-3 py-2 w-full text-muted-foreground hover:text-destructive transition-colors rounded-md hover:bg-muted">
+          <a href="/" className="flex items-center gap-3 px-3 py-2 w-full text-muted-foreground hover:text-destructive transition-colors rounded-md hover:bg-muted">
             <LogOut size={20} />
             <span className="font-medium">Logout</span>
-          </button>
+          </a>
         </div>
       </aside>
 

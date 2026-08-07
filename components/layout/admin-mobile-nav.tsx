@@ -58,10 +58,10 @@ export function AdminMobileNav() {
               <NavItem href="/admin/settings" icon={<Settings size={20} />} label="Settings" />
             </div>
             <div className="p-4 border-t">
-              <button className="flex items-center gap-3 px-4 py-2 w-full text-muted-foreground hover:text-destructive transition-colors font-medium rounded-md hover:bg-sidebar-accent">
+              <a href="/" className="flex items-center gap-3 px-4 py-2 w-full text-muted-foreground hover:text-destructive transition-colors font-medium rounded-md hover:bg-sidebar-accent">
                 <LogOut size={20} />
                 <span>Logout</span>
-              </button>
+              </a>
             </div>
           </div>
         </div>
