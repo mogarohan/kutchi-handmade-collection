@@ -16,6 +16,9 @@ import { updateProduct } from "@/app/actions/products";
 export default function EditProductForm({ product, categories = [] }: { product: any, categories: any[] }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isActive, setIsActive] = useState(product.is_active ?? true);
+  const [isFeatured, setIsFeatured] = useState(product.is_featured ?? false);
+  const [isTrending, setIsTrending] = useState(product.is_trending ?? false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -136,17 +139,20 @@ export default function EditProductForm({ product, categories = [] }: { product:
                     <Label className="text-base" htmlFor="isActive">Active</Label>
                     <p className="text-sm text-muted-foreground">Show product on website</p>
                   </div>
-                  <Switch id="isActive" name="isActive" defaultChecked={product.is_active} value="on" />
+                  <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
+                  <input type="hidden" name="isActive" value={isActive ? "on" : "off"} />
                 </div>
                 
                 <div className="space-y-4 pt-4 border-t border-border">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="isFeatured">Featured Product</Label>
-                    <Switch id="isFeatured" name="isFeatured" defaultChecked={product.is_featured} value="on" />
+                    <Switch id="isFeatured" checked={isFeatured} onCheckedChange={setIsFeatured} />
+                    <input type="hidden" name="isFeatured" value={isFeatured ? "on" : "off"} />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label htmlFor="isTrending">Trending</Label>
-                    <Switch id="isTrending" name="isTrending" defaultChecked={product.is_trending} value="on" />
+                    <Switch id="isTrending" checked={isTrending} onCheckedChange={setIsTrending} />
+                    <input type="hidden" name="isTrending" value={isTrending ? "on" : "off"} />
                   </div>
                 </div>
               </CardContent>

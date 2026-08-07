@@ -15,6 +15,9 @@ import { addProduct } from "@/app/actions/products";
 export default function NewProductForm({ categories = [] }: { categories: any[] }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [isTrending, setIsTrending] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -123,17 +126,20 @@ export default function NewProductForm({ categories = [] }: { categories: any[] 
                     <Label className="text-base" htmlFor="isActive">Active</Label>
                     <p className="text-sm text-muted-foreground">Show product on website</p>
                   </div>
-                  <Switch id="isActive" name="isActive" defaultChecked value="on" />
+                  <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
+                  <input type="hidden" name="isActive" value={isActive ? "on" : "off"} />
                 </div>
                 
                 <div className="space-y-4 pt-4 border-t border-border">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="isFeatured">Featured Product</Label>
-                    <Switch id="isFeatured" name="isFeatured" value="on" />
+                    <Switch id="isFeatured" checked={isFeatured} onCheckedChange={setIsFeatured} />
+                    <input type="hidden" name="isFeatured" value={isFeatured ? "on" : "off"} />
                   </div>
                   <div className="flex items-center justify-between">
                     <Label htmlFor="isTrending">Trending</Label>
-                    <Switch id="isTrending" name="isTrending" value="on" />
+                    <Switch id="isTrending" checked={isTrending} onCheckedChange={setIsTrending} />
+                    <input type="hidden" name="isTrending" value={isTrending ? "on" : "off"} />
                   </div>
                 </div>
               </CardContent>
