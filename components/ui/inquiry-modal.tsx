@@ -17,12 +17,13 @@ interface InquiryModalProps {
   productName: string;
   quantity: number;
   price: number;
-  onContinue: (customerName: string, customerPhone: string) => void;
+  onContinue: (customerName: string, customerPhone: string, notes?: string) => void;
 }
 
 export function InquiryModal({ isOpen, onClose, productName, quantity, price, onContinue }: InquiryModalProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,14 +38,17 @@ export function InquiryModal({ isOpen, onClose, productName, quantity, price, on
     setIsLoading(true);
     
     // Save to DB
-    const productDetails = `${quantity}x ${productName} (₹${price})`;
+    let productDetails = `${quantity}x ${productName} (₹${price})`;
+    if (notes) {
+      productDetails += `\nNotes: ${notes}`;
+    }
     await createInquiry(name, phone, productDetails);
     
     setIsLoading(false);
     onClose();
     
     // Proceed to WhatsApp
-    onContinue(name, phone);
+    onContinue(name, phone, notes);
   };
 
   return (
@@ -61,7 +65,7 @@ export function InquiryModal({ isOpen, onClose, productName, quantity, price, on
             <Label htmlFor="name">Your Name</Label>
             <Input 
               id="name" 
-              placeholder="John Doe" 
+              placeholder="Your Name" 
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -80,6 +84,16 @@ export function InquiryModal({ isOpen, onClose, productName, quantity, price, on
                 required
               />
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notes / Special Instructions (Optional)</Label>
+            <textarea 
+              id="notes" 
+              placeholder="E.g., Please make it 15 inches long" 
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="w-full h-20 px-3 py-2 rounded-md border border-input bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-sm"
+            />
           </div>
           <Button type="submit" className="w-full bg-[#25D366] hover:bg-[#20b858] text-white" disabled={isLoading}>
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

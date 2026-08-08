@@ -4,8 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
 // Use service role key to securely bypass RLS for admin operations
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function getOrders() {
@@ -23,6 +23,9 @@ export async function getOrders() {
 }
 
 export async function updateOrderStatus(orderId: string, newStatus: string) {
+  const { verifyAdmin } = await import("@/lib/auth-utils");
+  await verifyAdmin();
+  
   const { error } = await supabase
     .from("orders")
     .update({ status: newStatus })
@@ -52,6 +55,9 @@ export async function getInquiries() {
 }
 
 export async function updateInquiryStatus(inquiryId: string, newStatus: string) {
+  const { verifyAdmin } = await import("@/lib/auth-utils");
+  await verifyAdmin();
+  
   const { error } = await supabase
     .from("inquiries")
     .update({ status: newStatus })
@@ -77,10 +83,15 @@ export async function getOrderWithItems(orderId: string) {
 
   const { data: items } = await supabase
     .from("order_items")
-    .select("*")
+    .select("*, products(image_url)")
     .eq("order_id", orderId);
 
-  return { order, items: items || [] };
+  const mappedItems = items?.map((item: any) => ({
+    ...item,
+    product_image: item.products?.image_url || null
+  })) || [];
+
+  return { order, items: mappedItems };
 }
 
 async function getNextInvoiceNumber() {
@@ -124,6 +135,9 @@ export async function submitManualOrder(
   items: { product_id: string; name: string; quantity: number; price: number; originalPrice?: number }[]
 ) {
   try {
+    const { verifyAdmin } = await import("@/lib/auth-utils");
+    await verifyAdmin();
+    
     const invoiceNumber = await getNextInvoiceNumber();
 
     // 1. Save Order

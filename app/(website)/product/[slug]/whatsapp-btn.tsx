@@ -7,6 +7,7 @@ import { useCart } from "@/contexts/cart-context";
 import { InquiryModal } from "@/components/ui/inquiry-modal";
 
 interface Props {
+  productId: string;
   productName: string;
   originalPrice: number;
   salePrice: number;
@@ -14,13 +15,15 @@ interface Props {
   productSlug: string;
   productImage?: string;
   whatsappNumber?: string;
+  selectedSize?: string;
 }
 
-export default function WhatsAppOrderButton({ productName, originalPrice, salePrice, stock, productSlug, productImage, whatsappNumber }: Props) {
+export default function WhatsAppOrderButton({ productId, productName, originalPrice, salePrice, stock, productSlug, productImage, whatsappNumber, selectedSize }: Props) {
   const { items, addToCart, updateQuantity, removeFromCart, setIsCartOpen } = useCart();
   const adminPhone = whatsappNumber || "919313225740";
   
-  const cartItem = items.find(item => item.id === productSlug);
+  const cartItemId = selectedSize ? `${productSlug}-${selectedSize}` : productSlug;
+  const cartItem = items.find(item => item.id === cartItemId);
   const currentQuantity = cartItem ? cartItem.quantity : 1;
 
   const [isLiked, setIsLiked] = useState(false);
@@ -50,8 +53,10 @@ export default function WhatsAppOrderButton({ productName, originalPrice, salePr
     setIsModalOpen(true);
   };
 
-  const handleContinueToWhatsApp = (customerName: string, customerPhone: string) => {
-    const message = `Hello Kutchi Handmade Collection%0A%0AI would like to inquire/order:%0A*${productName}*%0AQuantity: ${currentQuantity}%0APrice: ₹${salePrice}%0ATotal: ₹${salePrice * currentQuantity}%0A%0AMy Name: ${customerName}%0AMy Phone: ${customerPhone}%0A%0APlease confirm.`;
+  const handleContinueToWhatsApp = (customerName: string, customerPhone: string, notes?: string) => {
+    const sizeText = selectedSize ? ` (Size: ${selectedSize})` : '';
+    const notesText = notes ? `%0A*Notes:* ${notes}` : '';
+    const message = `Hello Kutchi Handmade Collection%0A%0AI would like to inquire/order:%0A*${productName}*${sizeText}%0AQuantity: ${currentQuantity}%0APrice: ₹${salePrice}%0ATotal: ₹${salePrice * currentQuantity}${notesText}%0A%0AMy Name: ${customerName}%0AMy Phone: ${customerPhone}%0A%0APlease confirm.`;
     window.open(`https://wa.me/${adminPhone}?text=${message}`, "_blank");
   };
 
@@ -74,13 +79,15 @@ export default function WhatsAppOrderButton({ productName, originalPrice, salePr
               disabled={stock === 0}
               onClick={() => {
                 addToCart({
-                  id: productSlug,
+                  id: cartItemId,
+                  productId: productId,
                   name: productName,
                   price: salePrice,
                   originalPrice: originalPrice,
                   quantity: 1, // Default 1 piece
                   image: productImage,
                   slug: productSlug,
+                  size: selectedSize,
                 });
               }}
             >

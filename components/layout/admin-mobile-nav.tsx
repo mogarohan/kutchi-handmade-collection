@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X, LayoutDashboard, Package, ListTree, ShoppingCart, Users, Settings, LogOut, DollarSign } from "lucide-react";
+import { Menu, X, LayoutDashboard, Package, ListTree, ShoppingCart, Users, Settings, LogOut, IndianRupee } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function AdminMobileNav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,9 +27,12 @@ export function AdminMobileNav() {
           <img src="/logo.png" alt="Logo" className="h-10 w-auto object-contain rounded-md" />
           <h2 className="font-heading font-bold text-lg text-primary">Admin</h2>
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)}>
-          <Menu size={24} />
-        </Button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Button variant="ghost" size="icon" onClick={() => setIsOpen(true)}>
+            <Menu size={24} />
+          </Button>
+        </div>
       </div>
 
       {/* Slide-out Sidebar Drawer */}
@@ -53,7 +57,7 @@ export function AdminMobileNav() {
               <NavItem href="/admin/products" icon={<Package size={20} />} label="Products" />
               <NavItem href="/admin/categories" icon={<ListTree size={20} />} label="Categories" />
               <NavItem href="/admin/orders" icon={<ShoppingCart size={20} />} label="Orders" />
-              <NavItem href="/admin/revenue" icon={<DollarSign size={20} />} label="Revenue" />
+              <NavItem href="/admin/revenue" icon={<IndianRupee size={20} />} label="Revenue" />
               <NavItem href="/admin/customers" icon={<Users size={20} />} label="Customers" />
               <NavItem href="/admin/settings" icon={<Settings size={20} />} label="Settings" />
             </div>

@@ -3,8 +3,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function getCategories() {
@@ -17,6 +17,9 @@ export async function getCategories() {
 }
 
 export async function addCategory(formData: FormData) {
+  const { verifyAdmin } = await import("@/lib/auth-utils");
+  await verifyAdmin();
+  
   const name = formData.get("name") as string;
   
   // Generate a simple slug from name
@@ -67,6 +70,9 @@ export async function addCategory(formData: FormData) {
 }
 
 export async function deleteCategory(id: string) {
+  const { verifyAdmin } = await import("@/lib/auth-utils");
+  await verifyAdmin();
+  
   const { error } = await supabase.from("categories").delete().eq("id", id);
   if (error) {
     console.error("Error deleting category:", error);
@@ -92,6 +98,9 @@ export async function getCategoryById(id: string) {
 }
 
 export async function updateCategory(id: string, formData: FormData) {
+  const { verifyAdmin } = await import("@/lib/auth-utils");
+  await verifyAdmin();
+  
   const name = formData.get("name") as string;
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
 

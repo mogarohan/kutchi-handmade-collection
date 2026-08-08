@@ -123,6 +123,17 @@ export default function EditProductForm({ product, categories = [] }: { product:
                     <Input id="originalPrice" name="originalPrice" type="number" required defaultValue={product.original_price} />
                   </div>
                 </div>
+                
+                <div className="space-y-2 pt-4 border-t border-border mt-4">
+                  <Label htmlFor="availableSizes">Available Sizes (Optional)</Label>
+                  <Input 
+                    id="availableSizes" 
+                    name="availableSizes" 
+                    defaultValue={product.available_sizes ? product.available_sizes.join(", ") : ""}
+                    placeholder="e.g. S, M, L, XL, Free Size" 
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Enter sizes separated by commas.</p>
+                </div>
               </CardContent>
             </Card>
           </div>

@@ -6,19 +6,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { signIn } from "@/app/actions/auth";
+import { Loader2 } from "lucide-react";
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Hardcoded credentials for now
-    if (username === "admin" && password === "admin123") {
-      router.push("/admin/dashboard");
+    setIsLoading(true);
+
+    // Format username to a dummy email for Supabase Auth
+    // E.g., username "admin" -> "admin@admin.com"
+    const email = `${username.toLowerCase().trim()}@admin.com`;
+
+    const res = await signIn(email, password);
+
+    setIsLoading(false);
+
+    if (res.error) {
+      alert("Invalid credentials: " + res.error);
     } else {
-      alert("Invalid credentials");
+      router.push("/admin/dashboard");
     }
   };
 
@@ -35,9 +47,9 @@ export default function AdminLoginPage() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
-              <Input 
-                id="username" 
-                type="text" 
+              <Input
+                id="username"
+                type="text"
                 placeholder="admin"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -46,15 +58,16 @@ export default function AdminLoginPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input 
-                id="password" 
+              <Input
+                id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
-            <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button type="submit" disabled={isLoading} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               Sign In
             </Button>
           </form>

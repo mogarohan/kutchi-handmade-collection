@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getOrders, updateOrderStatus } from "@/app/actions/admin";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Loader2, Receipt, FileText, CheckCircle2, DollarSign } from "lucide-react";
+import { Loader2, Receipt, FileText, CheckCircle2, IndianRupee } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -54,7 +54,7 @@ export default function RevenuePage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-heading text-3xl font-bold text-primary flex items-center gap-3">
-            <DollarSign className="w-8 h-8" /> Total Revenue
+            <IndianRupee className="w-8 h-8" /> Total Revenue
           </h1>
           <p className="text-muted-foreground mt-1">Showing all successfully delivered orders</p>
         </div>

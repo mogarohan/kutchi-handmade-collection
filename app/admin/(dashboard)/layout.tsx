@@ -7,9 +7,10 @@ import {
   Users,
   Settings,
   LogOut,
-  DollarSign
+  IndianRupee
 } from "lucide-react";
 import { AdminMobileNav } from "@/components/layout/admin-mobile-nav";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   // In a real app, this layout might be conditionally rendered based on auth state
@@ -30,15 +31,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <NavItem href="/admin/products" icon={<Package size={20} />} label="Products" />
           <NavItem href="/admin/categories" icon={<ListTree size={20} />} label="Categories" />
           <NavItem href="/admin/orders" icon={<ShoppingCart size={20} />} label="Orders" />
-          <NavItem href="/admin/revenue" icon={<DollarSign size={20} />} label="Revenue" />
+          <NavItem href="/admin/revenue" icon={<IndianRupee size={20} />} label="Revenue" />
           <NavItem href="/admin/customers" icon={<Users size={20} />} label="Customers" />
           <NavItem href="/admin/settings" icon={<Settings size={20} />} label="Settings" />
         </nav>
-        <div className="p-4 border-t">
-          <a href="/" className="flex items-center gap-3 px-3 py-2 w-full text-muted-foreground hover:text-destructive transition-colors rounded-md hover:bg-muted">
+        <div className="p-4 border-t flex items-center justify-between">
+          <a href="/" className="flex items-center gap-3 px-3 py-2 text-muted-foreground hover:text-destructive transition-colors rounded-md hover:bg-muted">
             <LogOut size={20} />
             <span className="font-medium">Logout</span>
           </a>
+          <ThemeToggle />
         </div>
       </aside>
 

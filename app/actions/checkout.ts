@@ -5,8 +5,8 @@ import { getUser } from "@/app/actions/auth";
 import { revalidatePath } from "next/cache";
 
 // Use service role key to securely bypass RLS for inserting orders
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function getNextInvoiceNumber() {
@@ -45,24 +45,65 @@ async function getNextInvoiceNumber() {
 }
 
 export async function submitOrder(
-  formData: { name: string; phone: string; address: string },
-  cartTotal: number,
-  items: { name: string; quantity: number; price: number; originalPrice?: number }[]
+  formData: { name: string; phone: string; address: string; notes?: string },
+  clientCartTotal: number, // We receive this but will verify it
+  items: { productId: string; name: string; quantity: number; price: number; originalPrice?: number; size?: string; image?: string }[]
 ) {
   try {
     const user = await getUser();
     const invoiceNumber = await getNextInvoiceNumber();
 
-    // 1. Save Order
+    // Verify prices from the database securely
+    let verifiedTotal = 0;
+    const verifiedItems = [];
+
+    // Fetch all products involved in this order at once
+    const productIds = items.map(item => item.productId);
+    const { data: dbProducts, error: dbError } = await supabase
+      .from("products")
+      .select("id, name, sale_price, original_price")
+      .in("id", productIds);
+
+    if (dbError) {
+      console.error("Failed to verify products", dbError);
+      return { success: false, error: "Product verification failed" };
+    }
+
+    const productMap = new Map();
+    dbProducts?.forEach(p => productMap.set(p.id, p));
+
+    for (const item of items) {
+      const dbProduct = productMap.get(item.productId);
+      
+      if (!dbProduct) {
+        return { success: false, error: `Product not found: ${item.name}` };
+      }
+
+      const verifiedPrice = Number(dbProduct.sale_price);
+      verifiedTotal += verifiedPrice * item.quantity;
+
+      verifiedItems.push({
+        product_id: item.productId,
+        product_name: dbProduct.name, // Use DB name to prevent spoofing
+        quantity: item.quantity,
+        price_at_time: verifiedPrice,
+        original_price: Number(dbProduct.original_price) || verifiedPrice,
+        size: item.size || null,
+        product_image: item.image || null,
+      });
+    }
+
+    // 1. Save Order using VERIFIED total
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
         customer_name: formData.name,
         customer_phone: formData.phone,
         address: formData.address,
-        total_amount: cartTotal,
+        notes: formData.notes || null,
+        total_amount: verifiedTotal, // SECURE: Using server-calculated total
         status: "Pending",
-        user_id: user?.id || null, // Link to authenticated user if they exist
+        user_id: user?.id || null, 
         invoice_number: invoiceNumber,
       })
       .select()
@@ -74,12 +115,9 @@ export async function submitOrder(
     }
 
     // 2. Save Order Items
-    const orderItems = items.map((item) => ({
+    const orderItems = verifiedItems.map(vi => ({
+      ...vi,
       order_id: order.id,
-      product_name: item.name,
-      quantity: item.quantity,
-      price_at_time: item.price,
-      original_price: item.originalPrice || item.price, // Save original price if provided
     }));
 
     const { error: itemsError } = await supabase
