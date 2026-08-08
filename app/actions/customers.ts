@@ -7,36 +7,59 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABAS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function getCustomers() {
-  // We don't have a dedicated customers table, so we aggregate from orders
-  const { data: orders, error } = await supabase
-    .from("orders")
-    .select("customer_name, customer_phone, total_amount, created_at")
-    .order("created_at", { ascending: false });
-
-  if (error || !orders) {
-    console.error("Error fetching customers from orders:", error);
-    return [];
-  }
-
-  // Aggregate by phone number
   const customersMap = new Map<string, any>();
 
-  orders.forEach((order) => {
-    const phone = order.customer_phone;
-    if (!customersMap.has(phone)) {
-      customersMap.set(phone, {
-        name: order.customer_name,
-        phone: phone,
-        total_orders: 0,
-        total_spent: 0,
-        last_order_date: order.created_at, // Since it's ordered by created_at desc, the first one seen is the latest
+  // 1. Fetch Registered Users from Supabase Auth
+  try {
+    const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+    if (!authError && authData?.users) {
+      authData.users.forEach(user => {
+        // Skip admin accounts
+        if (user.email?.endsWith("@admin.com")) return;
+        
+        customersMap.set(user.id, {
+          name: user.user_metadata?.name || "Registered User",
+          phone: user.email || "No email",
+          total_orders: 0,
+          total_spent: 0,
+          last_order_date: user.created_at,
+          is_registered: true
+        });
       });
     }
+  } catch (err) {
+    console.error("Failed to fetch auth users", err);
+  }
 
-    const customer = customersMap.get(phone);
-    customer.total_orders += 1;
-    customer.total_spent += Number(order.total_amount);
-  });
+  // 2. Fetch Customers from Orders
+  const { data: orders, error: ordersError } = await supabase
+    .from("orders")
+    .select("customer_name, customer_phone, total_amount, created_at, user_id")
+    .order("created_at", { ascending: false });
+
+  if (!ordersError && orders) {
+    orders.forEach((order) => {
+      // If order is linked to a user, use user_id, else use phone as unique key
+      const key = order.user_id || order.customer_phone;
+      
+      if (!customersMap.has(key)) {
+        customersMap.set(key, {
+          name: order.customer_name,
+          phone: order.customer_phone,
+          total_orders: 0,
+          total_spent: 0,
+          last_order_date: order.created_at,
+          is_registered: false
+        });
+      }
+
+      const customer = customersMap.get(key);
+      customer.total_orders += 1;
+      customer.total_spent += Number(order.total_amount);
+      // Update name/phone if missing
+      if (customer.name === "Registered User") customer.name = order.customer_name;
+    });
+  }
 
   return Array.from(customersMap.values());
 }

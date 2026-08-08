@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { AdminMobileNav } from "@/components/layout/admin-mobile-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AdminRealtimeListener } from "@/components/admin-realtime-listener";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   // In a real app, this layout might be conditionally rendered based on auth state
@@ -18,6 +19,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex flex-col md:flex-row h-screen overflow-hidden bg-muted/20 relative">
+      <AdminRealtimeListener />
       <AdminMobileNav />
       
       {/* Sidebar */}
