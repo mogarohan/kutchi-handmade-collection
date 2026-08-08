@@ -16,7 +16,7 @@ export interface CartItem {
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (item: CartItem) => void;
+  addToCart: (item: CartItem, openCart?: boolean) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -54,7 +54,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isInitialized]);
 
-  const addToCart = (newItem: CartItem) => {
+  const addToCart = (newItem: CartItem, openCart: boolean = true) => {
     setItems((current) => {
       const existing = current.find((item) => item.id === newItem.id);
       if (existing) {
@@ -66,7 +66,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...current, newItem];
     });
-    setIsCartOpen(true); // Auto open cart when adding
+    if (openCart) {
+      setIsCartOpen(true);
+    }
   };
 
   const removeFromCart = (id: string) => {

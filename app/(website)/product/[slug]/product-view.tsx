@@ -68,7 +68,7 @@ export default function ProductView({ product, whatsappNumberSetting }: ProductV
         {/* Left Column: Main Image */}
         <div className="md:col-span-6 lg:col-span-5 flex flex-col gap-4 md:sticky md:top-24 self-start">
           <div 
-            className="w-full bg-white rounded-xl overflow-hidden relative flex items-center justify-center border border-border/50 h-auto max-h-[350px] aspect-[4/5] sm:max-h-[400px] cursor-zoom-in group"
+            className="w-full max-w-[400px] mx-auto bg-[#F9F6F0] rounded-full overflow-hidden relative flex items-center justify-center border-[8px] border-primary shadow-2xl aspect-square cursor-zoom-in group hover:border-primary/80 transition-colors duration-500"
             onClick={() => activeImage && setIsZoomed(true)}
           >
             {discount > 0 && (
@@ -77,7 +77,7 @@ export default function ProductView({ product, whatsappNumberSetting }: ProductV
               </Badge>
             )}
             {activeImage ? (
-              <img src={activeImage} alt={product.name} className="w-full h-full object-contain p-4 transition-transform duration-300 group-hover:scale-105" />
+              <img src={activeImage} alt={product.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
             ) : (
               <span className="text-muted-foreground/50">Main Image Placeholder</span>
             )}

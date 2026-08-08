@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { XCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { cancelOrder } from "@/app/actions/checkout";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export function CancelOrderButton({ orderId }: { orderId: string }) {
   const [isCancelling, setIsCancelling] = useState(false);

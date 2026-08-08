@@ -5,7 +5,7 @@ import { useEffect, useState, use } from "react";
 import { getOrderWithItems, updateOrderStatus, deleteOrder } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, MapPin, User, Phone, Package, Receipt, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 

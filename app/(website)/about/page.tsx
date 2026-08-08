@@ -19,20 +19,21 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 relative z-20 flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
           
           {/* Left Side: Text Content */}
-          <div className="w-full lg:w-1/2 text-center flex flex-col items-center justify-center space-y-8">
+          <div className="w-full lg:w-1/2 text-left flex flex-col items-start justify-center space-y-6 md:space-y-8 pl-2 sm:pl-4 md:pl-8 lg:pl-12 pr-2">
             <div className="inline-flex items-center justify-center gap-2 px-6 py-2 rounded-full border border-[#7C2D12]/20 bg-white shadow-sm text-[#7C2D12]">
               <Sparkles size={16} className="opacity-70" />
               <span className="font-heading font-bold tracking-widest text-xs uppercase">Since 2010</span>
               <Sparkles size={16} className="opacity-70" />
             </div>
             
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-[#7C2D12] leading-[1.1] tracking-tight whitespace-nowrap">
+            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-[#7C2D12] leading-[1.1] tracking-tight">
               Our <span className="italic">Heritage</span> Story
             </h1>
             
-            <p className="text-base md:text-lg text-muted-foreground leading-relaxed font-medium max-w-2xl mx-auto text-center">
-              For over a decade, we have preserved the vibrant artistic heritage of Kutch through premium handcrafted masterpieces. Every piece is thoughtfully created by skilled artisans using authentic mirror work and traditional techniques. Blending timeless culture with contemporary elegance, our collections make every occasion truly unforgettable. More than just a product, each creation reflects the passion and legacy of Kutch—crafted with love, worn with pride, and cherished for generations.
-            </p>
+            <div className="text-base md:text-lg text-muted-foreground leading-relaxed font-medium max-w-2xl text-left space-y-5">
+              <p>For over a decade, we have preserved the vibrant artistic heritage of Kutch through premium handcrafted masterpieces. Every piece is thoughtfully created by skilled artisans using authentic mirror work and traditional techniques.</p>
+              <p>Blending timeless culture with contemporary elegance, our collections make every occasion truly unforgettable. More than just a product, each creation reflects the passion and legacy of Kutch—crafted with love, worn with pride, and cherished for generations.</p>
+            </div>
           </div>
 
           {/* Right Side: Image */}

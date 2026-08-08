@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, Heart, Eye } from "lucide-react";
+import { ShoppingCart, Heart, Eye, Plus, Minus, Trash2 } from "lucide-react";
 import { Button } from "./button";
 import { Badge } from "./badge";
 import { Card, CardContent } from "./card";
 import { useCart } from "@/contexts/cart-context";
+import { toast } from "@/lib/toast";
 
 interface ProductCardProps {
   product: {
@@ -23,8 +24,10 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addToCart } = useCart();
+  const { items, addToCart, updateQuantity, removeFromCart, setIsCartOpen } = useCart();
   const discount = Math.round(((product.original_price - product.sale_price) / product.original_price) * 100);
+
+  const cartItem = items.find((item) => item.productId === product.id);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -38,7 +41,30 @@ export function ProductCard({ product }: ProductCardProps) {
       quantity: 1,
       image: product.image_url,
       slug: product.slug,
+    }, false); // Pass false to prevent auto-opening the cart sidebar
+    
+    toast.success(`${product.name} added to cart`, {
+      action: {
+        label: "View Cart",
+        onClick: () => setIsCartOpen(true),
+      },
+      cancel: {
+        label: "Continue Shopping",
+        onClick: () => {},
+      }
     });
+  };
+
+  const handleUpdateQuantity = (e: React.MouseEvent, delta: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!cartItem) return;
+    
+    if (cartItem.quantity + delta < 1) {
+      removeFromCart(cartItem.id);
+    } else {
+      updateQuantity(cartItem.id, cartItem.quantity + delta);
+    }
   };
 
   return (
@@ -48,28 +74,29 @@ export function ProductCard({ product }: ProductCardProps) {
         <span className="sr-only">View {product.name}</span>
       </Link>
 
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#F9F6F0] shrink-0">
-        {/* Badges */}
-        <div className="absolute left-4 top-4 z-10 flex flex-col gap-2 pointer-events-none">
-          {product.is_trending && (
-            <Badge className="bg-secondary/90 backdrop-blur-sm text-secondary-foreground">Trending</Badge>
-          )}
-          {product.is_featured && (
-            <Badge className="bg-primary/90 backdrop-blur-sm text-primary-foreground">Featured</Badge>
-          )}
-          {discount > 0 && (
-            <Badge className="bg-destructive/90 backdrop-blur-sm text-destructive-foreground">
-              {discount}% OFF
-            </Badge>
-          )}
-        </div>
+      {/* Badges - Moved to Top Left of Card */}
+      <div className="absolute left-4 top-4 z-20 flex flex-col gap-1.5 pointer-events-none">
+        {product.is_trending && (
+          <Badge className="bg-secondary/90 backdrop-blur-sm text-secondary-foreground text-xs shadow-sm">Trending</Badge>
+        )}
+        {product.is_featured && (
+          <Badge className="bg-primary/90 backdrop-blur-sm text-primary-foreground text-xs shadow-sm">Featured</Badge>
+        )}
+        {discount > 0 && (
+          <Badge className="bg-[#D4AF37] backdrop-blur-sm text-white text-xs font-bold shadow-sm border-none">
+            {discount}% OFF
+          </Badge>
+        )}
+      </div>
 
-        {/* Hover Actions */}
-        <div className="absolute right-4 top-4 z-20 flex flex-col gap-3 opacity-0 transition-all duration-300 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0">
-          <Button size="icon" variant="secondary" className="h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm shadow-md hover:text-primary hover:bg-white hover:scale-110 transition-all relative z-30 pointer-events-auto">
-            <Heart size={18} />
-          </Button>
-        </div>
+      {/* Hover Actions / Favorite - Moved to Top Right of Card */}
+      <div className="absolute right-4 top-4 z-20 opacity-0 transition-all duration-300 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0">
+        <Button size="icon" variant="secondary" className="h-10 w-10 rounded-full bg-white/90 backdrop-blur-sm shadow-md hover:bg-white hover:scale-110 transition-all relative z-30 pointer-events-auto">
+          <Heart size={18} className="text-primary fill-primary/10" />
+        </Button>
+      </div>
+
+      <div className="relative aspect-square w-full max-w-[200px] mx-auto mt-6 overflow-hidden bg-[#F9F6F0] shrink-0 rounded-full border-[6px] border-primary shadow-xl group-hover:border-primary/80 transition-colors duration-500">
 
         {/* Image */}
         <div className="h-full w-full transition-transform duration-700 group-hover:scale-110 flex items-center justify-center pointer-events-none">
@@ -99,13 +126,37 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Action Buttons directly on the card */}
         <div className="mt-auto pt-4 sm:pt-6 flex gap-2 pointer-events-auto relative z-30">
-          <Button 
-            className="flex-1 gap-1.5 sm:gap-2 rounded-xl h-9 sm:h-11 px-2 sm:px-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md text-xs sm:text-sm md:text-base font-semibold"
-            onClick={handleQuickAdd}
-          >
-            <ShoppingCart size={16} className="shrink-0 sm:w-[18px] sm:h-[18px]" />
-            Add to Cart
-          </Button>
+          {cartItem ? (
+            <div className="flex-1 flex items-center justify-between border-2 border-primary rounded-xl h-9 sm:h-11 px-1 bg-primary/5">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-full w-10 text-primary hover:bg-primary/10 rounded-lg"
+                onClick={(e) => handleUpdateQuantity(e, -1)}
+              >
+                {cartItem.quantity === 1 ? <Trash2 size={16} /> : <Minus size={16} />}
+              </Button>
+              <span className="font-bold text-primary font-sans">
+                {cartItem.quantity}
+              </span>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-full w-10 text-primary hover:bg-primary/10 rounded-lg"
+                onClick={(e) => handleUpdateQuantity(e, 1)}
+              >
+                <Plus size={16} />
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              className="flex-1 gap-1.5 sm:gap-2 rounded-xl h-9 sm:h-11 px-2 sm:px-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md text-xs sm:text-sm md:text-base font-semibold"
+              onClick={handleQuickAdd}
+            >
+              <ShoppingCart size={16} className="shrink-0 sm:w-[18px] sm:h-[18px]" />
+              Add to Cart
+            </Button>
+          )}
           <Link href={`/product/${product.slug}`} className="shrink-0 hidden sm:block" onClick={(e) => e.stopPropagation()}>
             <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl hover:bg-primary hover:text-primary-foreground transition-all">
               <Eye size={18} />

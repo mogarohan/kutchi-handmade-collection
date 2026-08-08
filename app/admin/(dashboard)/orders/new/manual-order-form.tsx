@@ -2,10 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus, Trash2, Loader2, Search, Tag, Image as ImageIcon } from "lucide-react";
+import { Plus, Minus, Trash2, Loader2, Search, Tag, Image as ImageIcon, Users } from "lucide-react";
 import { submitManualOrder } from "@/app/actions/admin";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Input } from "@/components/ui/input";
 
 interface Product {
@@ -143,11 +143,11 @@ export default function ManualOrderForm({
             />
           </div>
           
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
             <button
               type="button"
               onClick={() => setSelectedCategory(null)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+              className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                 selectedCategory === null 
                   ? 'bg-primary text-primary-foreground shadow-md' 
                   : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -160,7 +160,7 @@ export default function ManualOrderForm({
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.slug)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                   selectedCategory === cat.slug 
                     ? 'bg-primary text-primary-foreground shadow-md' 
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
@@ -211,8 +211,37 @@ export default function ManualOrderForm({
       {/* RIGHT PANEL: Cart & Checkout (takes up 5 columns) */}
       <div className="xl:col-span-5 flex flex-col h-[800px] bg-card border rounded-2xl overflow-hidden shadow-sm">
         <div className="p-4 border-b bg-muted/20">
-          <h2 className="font-semibold text-lg flex items-center gap-2">
-            <Tag className="w-5 h-5 text-primary" /> Order Cart
+          <h2 className="font-semibold text-lg flex items-center gap-2 mb-4">
+            <Users className="w-5 h-5 text-primary" /> Customer Details
+          </h2>
+          <div className="space-y-3">
+            <Input 
+              placeholder="Customer Name" 
+              required
+              className="bg-background"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+            />
+            <Input 
+              placeholder="Phone Number (+91...)" 
+              required
+              className="bg-background"
+              value={formData.phone}
+              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+            />
+            <Input 
+              placeholder="Shipping Address / Notes" 
+              required
+              className="bg-background"
+              value={formData.address}
+              onChange={(e) => setFormData({...formData, address: e.target.value})}
+            />
+          </div>
+        </div>
+
+        <div className="p-4 border-b bg-muted/10">
+          <h2 className="font-semibold flex items-center gap-2 text-sm text-muted-foreground uppercase tracking-wider">
+            <Tag className="w-4 h-4" /> Order Cart
           </h2>
         </div>
 
@@ -276,34 +305,10 @@ export default function ManualOrderForm({
               </div>
             </div>
             
-            <div className="pt-3 border-t flex justify-between items-center">
+            <div className="pt-3 border-t flex justify-between items-center mb-6">
               <span className="font-bold text-lg">Total</span>
               <span className="font-bold text-2xl text-primary">₹{finalTotal}</span>
             </div>
-          </div>
-
-          <div className="space-y-3 mb-6">
-            <Input 
-              placeholder="Customer Name" 
-              required
-              className="bg-muted/30"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-            />
-            <Input 
-              placeholder="Phone Number (+91...)" 
-              required
-              className="bg-muted/30"
-              value={formData.phone}
-              onChange={(e) => setFormData({...formData, phone: e.target.value})}
-            />
-            <Input 
-              placeholder="Shipping Address / Notes" 
-              required
-              className="bg-muted/30"
-              value={formData.address}
-              onChange={(e) => setFormData({...formData, address: e.target.value})}
-            />
           </div>
 
           <Button type="submit" disabled={isSubmitting || selectedItems.length === 0} className="w-full h-12 text-lg font-bold shadow-md hover:shadow-lg transition-all">

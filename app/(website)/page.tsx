@@ -84,6 +84,44 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* 2. OUR STORY (New Section based on User Text) */}
+      <section className="py-20 md:py-28 bg-[#fdfbf7] relative overflow-hidden">
+        {/* Decorative Watermark / Background */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.02] pointer-events-none select-none flex items-center justify-center w-[120%] h-[120%]">
+          <svg viewBox="0 0 200 200" className="w-full h-full fill-[#7C2D12]">
+            <path d="M100 0 C120 40, 180 40, 200 100 C180 160, 120 160, 100 200 C80 160, 20 160, 0 100 C20 40, 80 40, 100 0 Z" />
+          </svg>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10 max-w-5xl">
+          <div className="flex flex-col md:flex-row items-center gap-12 text-left">
+            <div className="w-full md:w-5/12 space-y-6 border-l-4 border-[#7C2D12] pl-6">
+              <span className="font-heading font-bold tracking-[0.2em] text-[#7C2D12] text-sm uppercase block">Our Legacy</span>
+              <p className="font-serif text-2xl md:text-3xl lg:text-4xl text-[#461708] leading-[1.4] italic font-medium">
+                "For over a decade, we have preserved the vibrant artistic heritage of Kutch through premium handcrafted masterpieces."
+              </p>
+            </div>
+            
+            <div className="w-full md:w-7/12 space-y-6 font-sans text-base md:text-lg text-gray-700 leading-relaxed text-left pl-4 md:pl-0 pr-2">
+              <p>
+                Every piece is thoughtfully created by skilled artisans using authentic mirror work and traditional techniques. Blending timeless culture with contemporary elegance, our collections make every occasion truly unforgettable.
+              </p>
+              <p>
+                More than just a product, each creation reflects the passion and legacy of Kutch—crafted with love, worn with pride, and cherished for generations.
+              </p>
+              <div className="pt-4">
+                <Link href="/about">
+                  <Button variant="link" className="text-[#7C2D12] font-bold text-lg group p-0 h-auto">
+                    Discover Our Story 
+                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 2. DYNAMIC CATEGORIES (New Arch Look) */}
       <section className="py-12 md:py-16 bg-white relative overflow-hidden">
         {/* Subtle decorative background for Categories */}
