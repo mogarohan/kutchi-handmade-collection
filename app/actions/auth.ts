@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-export async function signUp(email: string, password: string, name: string) {
+export async function signUp(email: string, password: string, name: string, username: string) {
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.signUp({
@@ -12,6 +12,7 @@ export async function signUp(email: string, password: string, name: string) {
     options: {
       data: {
         name,
+        username,
       },
     },
   });
