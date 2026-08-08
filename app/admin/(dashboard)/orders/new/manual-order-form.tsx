@@ -1,19 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Minus, Trash2, Loader2, ArrowRight } from "lucide-react";
+import { Plus, Minus, Trash2, Loader2, Search, Tag, Image as ImageIcon } from "lucide-react";
 import { submitManualOrder } from "@/app/actions/admin";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 interface Product {
   id: string;
   name: string;
   sale_price: number;
+  category: string;
+  image_url?: string;
 }
 
-export default function ManualOrderForm({ availableProducts }: { availableProducts: Product[] }) {
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export default function ManualOrderForm({ 
+  availableProducts, 
+  categories 
+}: { 
+  availableProducts: Product[];
+  categories: Category[];
+}) {
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
@@ -21,26 +36,43 @@ export default function ManualOrderForm({ availableProducts }: { availableProduc
     address: "",
   });
   
-  const [selectedItems, setSelectedItems] = useState<{ product_id: string; name: string; quantity: number; price: number }[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const [selectedItems, setSelectedItems] = useState<{ 
+    product_id: string; 
+    name: string; 
+    quantity: number; 
+    price: number;
+    originalPrice: number;
+  }[]>([]);
+  
+  const [discountAmount, setDiscountAmount] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleAddProduct = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const pId = e.target.value;
-    if (!pId) return;
-    
-    const prod = availableProducts.find(p => p.id === pId);
-    if (!prod) return;
-    
-    if (selectedItems.some(i => i.product_id === pId)) return; // already added
+  // Filter products based on search and category
+  const filteredProducts = useMemo(() => {
+    return availableProducts.filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory ? p.category === selectedCategory : true;
+      return matchesSearch && matchesCategory;
+    });
+  }, [availableProducts, searchQuery, selectedCategory]);
+
+  const handleAddProduct = (prod: Product) => {
+    if (selectedItems.some(i => i.product_id === prod.id)) {
+      // If already added, just increase quantity
+      updateQuantity(prod.id, 1);
+      return;
+    }
 
     setSelectedItems([...selectedItems, {
       product_id: prod.id,
       name: prod.name,
       quantity: 1,
       price: prod.sale_price,
+      originalPrice: prod.sale_price
     }]);
-    
-    e.target.value = ""; // reset select
   };
 
   const updateQuantity = (product_id: string, delta: number) => {
@@ -53,11 +85,22 @@ export default function ManualOrderForm({ availableProducts }: { availableProduc
     }));
   };
 
+  const updatePrice = (product_id: string, newPrice: number) => {
+    if (isNaN(newPrice) || newPrice < 0) return;
+    setSelectedItems(items => items.map(item => {
+      if (item.product_id === product_id) {
+        return { ...item, price: newPrice };
+      }
+      return item;
+    }));
+  };
+
   const removeItem = (product_id: string) => {
     setSelectedItems(items => items.filter(item => item.product_id !== product_id));
   };
 
-  const total = selectedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const subtotal = selectedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const finalTotal = Math.max(0, subtotal - discountAmount);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +111,7 @@ export default function ManualOrderForm({ availableProducts }: { availableProduc
 
     setIsSubmitting(true);
     
-    const res = await submitManualOrder(formData, total, selectedItems);
+    const res = await submitManualOrder(formData, finalTotal, selectedItems, discountAmount);
     
     if (res.success && res.orderId) {
       toast.success("Manual order created successfully!");
@@ -83,93 +126,191 @@ export default function ManualOrderForm({ availableProducts }: { availableProduc
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-      {/* Customer Details */}
-      <div className="space-y-6">
-        <h2 className="text-xl font-semibold mb-4 border-b pb-2">Customer Details</h2>
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+      
+      {/* LEFT PANEL: POS Browser (takes up 7 columns) */}
+      <div className="xl:col-span-7 flex flex-col h-[800px] bg-card border rounded-2xl overflow-hidden shadow-sm">
         
-        <div>
-          <label className="block text-sm font-medium mb-2">Customer Name</label>
-          <input 
-            type="text" 
-            required
-            className="w-full h-11 px-3 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/50"
-            value={formData.name}
-            onChange={(e) => setFormData({...formData, name: e.target.value})}
-          />
+        {/* Search & Categories Header */}
+        <div className="p-4 border-b bg-muted/20 space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <Input 
+              placeholder="Search products by name..."
+              className="pl-10 h-12 bg-background border-muted text-base"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button
+              type="button"
+              onClick={() => setSelectedCategory(null)}
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                selectedCategory === null 
+                  ? 'bg-primary text-primary-foreground shadow-md' 
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              All Products
+            </button>
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedCategory(cat.slug)}
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+                  selectedCategory === cat.slug 
+                    ? 'bg-primary text-primary-foreground shadow-md' 
+                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Phone Number</label>
-          <input 
-            type="text" 
-            required
-            placeholder="+91..."
-            className="w-full h-11 px-3 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/50"
-            value={formData.phone}
-            onChange={(e) => setFormData({...formData, phone: e.target.value})}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Address</label>
-          <textarea 
-            required
-            rows={3}
-            className="w-full p-3 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/50 resize-none"
-            value={formData.address}
-            onChange={(e) => setFormData({...formData, address: e.target.value})}
-          />
+        {/* Product Grid */}
+        <div className="flex-1 overflow-y-auto p-4 bg-muted/5">
+          {filteredProducts.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+              <Search className="w-12 h-12 mb-4 opacity-20" />
+              <p>No products found.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {filteredProducts.map(prod => (
+                <div 
+                  key={prod.id}
+                  onClick={() => handleAddProduct(prod)}
+                  className="group relative bg-background border rounded-xl p-3 cursor-pointer hover:border-primary hover:shadow-md transition-all flex flex-col"
+                >
+                  <div className="aspect-square rounded-lg bg-muted mb-3 flex items-center justify-center overflow-hidden relative">
+                    {prod.image_url ? (
+                      <img src={prod.image_url} alt={prod.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    ) : (
+                      <ImageIcon className="w-8 h-8 text-muted-foreground/30" />
+                    )}
+                    <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Plus className="w-8 h-8 text-primary bg-background rounded-full p-1 shadow-sm" />
+                    </div>
+                  </div>
+                  <h3 className="text-sm font-medium line-clamp-2 leading-tight mb-1">{prod.name}</h3>
+                  <div className="mt-auto pt-2 flex items-center justify-between">
+                    <span className="font-bold text-primary">₹{prod.sale_price}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Order Builder */}
-      <div className="bg-muted/30 p-6 rounded-2xl border">
-        <h2 className="text-xl font-semibold mb-6">Select Products</h2>
-        
-        <select 
-          className="w-full h-11 px-3 mb-6 rounded-md border bg-background outline-none focus:ring-2 focus:ring-primary/50"
-          onChange={handleAddProduct}
-          defaultValue=""
-        >
-          <option value="" disabled>-- Choose a product to add --</option>
-          {availableProducts.map(p => (
-            <option key={p.id} value={p.id}>{p.name} (₹{p.sale_price})</option>
-          ))}
-        </select>
+      {/* RIGHT PANEL: Cart & Checkout (takes up 5 columns) */}
+      <div className="xl:col-span-5 flex flex-col h-[800px] bg-card border rounded-2xl overflow-hidden shadow-sm">
+        <div className="p-4 border-b bg-muted/20">
+          <h2 className="font-semibold text-lg flex items-center gap-2">
+            <Tag className="w-5 h-5 text-primary" /> Order Cart
+          </h2>
+        </div>
 
-        <div className="space-y-4 mb-6">
-          {selectedItems.map(item => (
-            <div key={item.product_id} className="flex justify-between items-center bg-background p-3 rounded-md border">
-              <div className="flex-1">
-                <p className="font-medium text-sm line-clamp-1">{item.name}</p>
-                <p className="text-xs text-muted-foreground mt-1">₹{item.price} x {item.quantity} = ₹{item.price * item.quantity}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center border rounded-md">
-                  <button type="button" onClick={() => updateQuantity(item.product_id, -1)} className="p-1.5 hover:bg-muted"><Minus size={14}/></button>
-                  <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
-                  <button type="button" onClick={() => updateQuantity(item.product_id, 1)} className="p-1.5 hover:bg-muted"><Plus size={14}/></button>
-                </div>
-                <button type="button" onClick={() => removeItem(item.product_id)} className="p-1.5 text-destructive hover:bg-destructive/10 rounded-md">
-                  <Trash2 size={16}/>
-                </button>
-              </div>
+        {/* Cart Items */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/5">
+          {selectedItems.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-muted-foreground opacity-50">
+              <p>Cart is empty</p>
+              <p className="text-sm">Click products to add them</p>
             </div>
-          ))}
-          {selectedItems.length === 0 && (
-            <p className="text-sm text-center py-8 text-muted-foreground border-2 border-dashed rounded-md">No products added yet.</p>
+          ) : (
+            selectedItems.map(item => (
+              <div key={item.product_id} className="bg-background border rounded-xl p-3 shadow-sm flex flex-col gap-3">
+                <div className="flex justify-between items-start">
+                  <span className="font-medium text-sm pr-4 line-clamp-2">{item.name}</span>
+                  <button type="button" onClick={() => removeItem(item.product_id)} className="text-red-400 hover:text-red-600 transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center border rounded-lg bg-muted/20">
+                    <button type="button" onClick={() => updateQuantity(item.product_id, -1)} className="p-2 hover:bg-muted transition-colors"><Minus size={14}/></button>
+                    <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
+                    <button type="button" onClick={() => updateQuantity(item.product_id, 1)} className="p-2 hover:bg-muted transition-colors"><Plus size={14}/></button>
+                  </div>
+                  
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm text-muted-foreground">₹</span>
+                    <Input 
+                      type="number"
+                      value={item.price || ''}
+                      onChange={(e) => updatePrice(item.product_id, parseFloat(e.target.value))}
+                      className="w-20 h-8 text-right font-bold text-primary"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))
           )}
         </div>
 
-        <div className="border-t pt-4 flex justify-between items-center mb-6">
-          <span className="font-semibold text-muted-foreground">Total</span>
-          <span className="text-2xl font-bold text-primary">₹{total}</span>
-        </div>
+        {/* Totals & Checkout Form */}
+        <div className="p-4 border-t bg-background">
+          <div className="space-y-3 mb-6">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Subtotal</span>
+              <span className="font-medium">₹{subtotal}</span>
+            </div>
+            
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground flex items-center gap-1">Discount <Tag className="w-3 h-3"/></span>
+              <div className="flex items-center gap-1 w-24">
+                <span className="text-muted-foreground">₹</span>
+                <Input 
+                  type="number"
+                  value={discountAmount || ''}
+                  onChange={(e) => setDiscountAmount(parseFloat(e.target.value) || 0)}
+                  className="h-7 text-right text-red-500 font-medium"
+                />
+              </div>
+            </div>
+            
+            <div className="pt-3 border-t flex justify-between items-center">
+              <span className="font-bold text-lg">Total</span>
+              <span className="font-bold text-2xl text-primary">₹{finalTotal}</span>
+            </div>
+          </div>
 
-        <Button type="submit" className="w-full h-12 text-lg gap-2" disabled={isSubmitting || selectedItems.length === 0}>
-          {isSubmitting ? <Loader2 className="animate-spin" /> : <><ArrowRight size={20} /> Create & Generate Invoice</>}
-        </Button>
+          <div className="space-y-3 mb-6">
+            <Input 
+              placeholder="Customer Name" 
+              required
+              className="bg-muted/30"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+            />
+            <Input 
+              placeholder="Phone Number (+91...)" 
+              required
+              className="bg-muted/30"
+              value={formData.phone}
+              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+            />
+            <Input 
+              placeholder="Shipping Address / Notes" 
+              required
+              className="bg-muted/30"
+              value={formData.address}
+              onChange={(e) => setFormData({...formData, address: e.target.value})}
+            />
+          </div>
+
+          <Button type="submit" disabled={isSubmitting || selectedItems.length === 0} className="w-full h-12 text-lg font-bold shadow-md hover:shadow-lg transition-all">
+            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
+            {isSubmitting ? "Processing..." : "Create Order & Print Invoice"}
+          </Button>
+        </div>
       </div>
     </form>
   );

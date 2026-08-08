@@ -132,7 +132,8 @@ async function getNextInvoiceNumber() {
 export async function submitManualOrder(
   formData: { name: string; phone: string; address: string },
   cartTotal: number,
-  items: { product_id: string; name: string; quantity: number; price: number; originalPrice?: number }[]
+  items: { product_id: string; name: string; quantity: number; price: number; originalPrice?: number }[],
+  discountAmount: number = 0
 ) {
   try {
     const { verifyAdmin } = await import("@/lib/auth-utils");
@@ -148,6 +149,7 @@ export async function submitManualOrder(
         customer_phone: formData.phone,
         address: formData.address,
         total_amount: cartTotal,
+        discount_amount: discountAmount,
         status: "Pending",
         user_id: null, // Manual admin orders are disconnected from user accounts by default
         invoice_number: invoiceNumber,

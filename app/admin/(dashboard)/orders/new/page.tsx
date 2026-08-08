@@ -1,10 +1,12 @@
 import { getProducts } from "@/app/actions/products";
+import { getCategories } from "@/app/actions/categories";
 import ManualOrderForm from "./manual-order-form";
 
 export const revalidate = 0;
 
 export default async function NewOrderPage() {
   const products = await getProducts();
+  const categories = await getCategories();
   
   return (
     <div className="p-8 max-w-5xl mx-auto">
@@ -14,7 +16,7 @@ export default async function NewOrderPage() {
         This will bypass the website checkout and instantly generate an invoice.
       </p>
       
-      <ManualOrderForm availableProducts={products} />
+      <ManualOrderForm availableProducts={products} categories={categories} />
     </div>
   );
 }
