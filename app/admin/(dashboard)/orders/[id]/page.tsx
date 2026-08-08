@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { supabase } from "@/lib/supabase";
+
 import { getOrderWithItems, updateOrderStatus, deleteOrder } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, MapPin, User, Phone, Package, Receipt, Trash2 } from "lucide-react";
@@ -18,6 +18,7 @@ interface Order {
   status: string;
   created_at: string;
   invoice_number?: number;
+  notes?: string;
 }
 
 interface OrderItem {
@@ -25,6 +26,8 @@ interface OrderItem {
   product_name: string;
   quantity: number;
   price_at_time: number;
+  size?: string;
+  product_image?: string;
 }
 
 export default function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -178,6 +181,12 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                 <p className="text-muted-foreground mb-1 flex items-center gap-1"><MapPin size={14} /> Delivery Address</p>
                 <p className="font-medium whitespace-pre-wrap leading-relaxed bg-muted/30 p-3 rounded-md">{order.address}</p>
               </div>
+              {order.notes && (
+                <div>
+                  <p className="text-muted-foreground mb-1">Notes / Special Instructions</p>
+                  <p className="font-medium whitespace-pre-wrap leading-relaxed bg-amber-50 text-amber-900 border border-amber-200 p-3 rounded-md">{order.notes}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -190,10 +199,20 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
             </h3>
             <div className="space-y-4 mb-6">
               {items.map((item) => (
-                <div key={item.id} className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
-                  <div>
+                <div key={item.id} className="flex gap-4 items-center py-2 border-b border-border/50 last:border-0">
+                  <div className="w-16 h-16 bg-muted rounded-md overflow-hidden shrink-0">
+                    {item.product_image ? (
+                      <img src={item.product_image} alt={item.product_name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">No img</div>
+                    )}
+                  </div>
+                  <div className="flex-1">
                     <h4 className="font-medium">{item.product_name}</h4>
-                    <p className="text-muted-foreground text-sm">₹{item.price_at_time} x {item.quantity}</p>
+                    {item.size && (
+                      <p className="text-muted-foreground text-xs mt-0.5">Size: {item.size}</p>
+                    )}
+                    <p className="text-muted-foreground text-sm mt-0.5">₹{item.price_at_time} x {item.quantity}</p>
                   </div>
                   <div className="font-bold">
                     ₹{item.price_at_time * item.quantity}

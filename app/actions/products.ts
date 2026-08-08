@@ -4,8 +4,8 @@ import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
 // Server-side Supabase client (can bypass RLS if using service role, but anon key is fine for this scope)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function getProducts(onlyActive = false) {
@@ -36,6 +36,9 @@ export async function getProductBySlug(slug: string) {
 }
 
 export async function addProduct(formData: FormData) {
+  const { verifyAdmin } = await import("@/lib/auth-utils");
+  await verifyAdmin();
+  
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
   const original_price = parseFloat(formData.get("originalPrice") as string);
@@ -45,6 +48,11 @@ export async function addProduct(formData: FormData) {
   const is_active = formData.get("isActive") === "on";
   const is_featured = formData.get("isFeatured") === "on";
   const is_trending = formData.get("isTrending") === "on";
+  
+  const availableSizesStr = formData.get("availableSizes") as string;
+  const available_sizes = availableSizesStr
+    ? availableSizesStr.split(',').map(s => s.trim()).filter(s => s.length > 0)
+    : [];
   
   // Generate a simple slug from name (we need this early for folder naming)
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
@@ -108,6 +116,7 @@ export async function addProduct(formData: FormData) {
       is_active,
       is_featured,
       is_trending,
+      available_sizes,
       ...(image_url ? { image_url } : {}),
       ...(gallery_urls.length > 0 ? { gallery_urls } : {})
     }
@@ -126,6 +135,9 @@ export async function addProduct(formData: FormData) {
 }
 
 export async function deleteProduct(id: string) {
+  const { verifyAdmin } = await import("@/lib/auth-utils");
+  await verifyAdmin();
+  
   const { error } = await supabase.from("products").delete().eq("id", id);
   if (error) {
     console.error("Error deleting product:", error);
@@ -151,6 +163,9 @@ export async function getProductById(id: string) {
 }
 
 export async function updateProduct(id: string, formData: FormData) {
+  const { verifyAdmin } = await import("@/lib/auth-utils");
+  await verifyAdmin();
+  
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
   const original_price = parseFloat(formData.get("originalPrice") as string);
@@ -160,6 +175,11 @@ export async function updateProduct(id: string, formData: FormData) {
   const is_active = formData.get("isActive") === "on";
   const is_featured = formData.get("isFeatured") === "on";
   const is_trending = formData.get("isTrending") === "on";
+  
+  const availableSizesStr = formData.get("availableSizes") as string;
+  const available_sizes = availableSizesStr
+    ? availableSizesStr.split(',').map(s => s.trim()).filter(s => s.length > 0)
+    : [];
   
   // Generate a simple slug from name early
   const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
@@ -219,6 +239,7 @@ export async function updateProduct(id: string, formData: FormData) {
     is_active,
     is_featured,
     is_trending,
+    available_sizes,
     ...(image_url ? { image_url } : {})
   };
 

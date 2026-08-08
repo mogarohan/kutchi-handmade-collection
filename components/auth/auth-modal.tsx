@@ -21,7 +21,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, defaultMode = "login" }:
   const [error, setError] = useState("");
   
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -33,14 +33,20 @@ export function AuthModal({ isOpen, onClose, onSuccess, defaultMode = "login" }:
     setError("");
 
     try {
+      // Convert username to a dummy email for Supabase
+      const dummyEmail = `${username.toLowerCase().trim().replace(/[^a-z0-9_]/g, '')}@kutchi.local`;
+
       if (mode === "register") {
         if (!name.trim()) {
           throw new Error("Name is required");
         }
+        if (!username.trim() || username.trim().length < 3) {
+          throw new Error("Username must be at least 3 characters");
+        }
         if (password !== confirmPassword) {
           throw new Error("Passwords do not match");
         }
-        const res = await signUp(email, password, name);
+        const res = await signUp(dummyEmail, password, name);
         if (res.error) throw new Error(res.error);
         
         // Sign out immediately because Supabase auto-logs in users when email confirmation is disabled
@@ -54,7 +60,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, defaultMode = "login" }:
           setIsSuccess(false);
         }, 1500);
       } else {
-        const res = await signIn(email, password);
+        const res = await signIn(dummyEmail, password);
         if (res.error) throw new Error(res.error);
         
         setIsSuccess(true);
@@ -100,7 +106,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, defaultMode = "login" }:
                 <Label htmlFor="name">Full Name</Label>
                 <Input 
                   id="name" 
-                  placeholder="John Doe" 
+                  placeholder="Your Name" 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required={mode === "register"} 
@@ -109,13 +115,13 @@ export function AuthModal({ isOpen, onClose, onSuccess, defaultMode = "login" }:
             )}
             
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="username">Username</Label>
               <Input 
-                id="email" 
-                type="email" 
-                placeholder="hello@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username" 
+                type="text" 
+                placeholder="your_unique_username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required 
               />
             </div>

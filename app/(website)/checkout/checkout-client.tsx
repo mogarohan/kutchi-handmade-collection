@@ -20,6 +20,7 @@ export default function CheckoutClient({ whatsappNumber, user }: { whatsappNumbe
     name: user?.user_metadata?.name || "",
     phone: "",
     address: "",
+    notes: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -64,9 +65,14 @@ export default function CheckoutClient({ whatsappNumber, user }: { whatsappNumbe
       
       message += `*Order Summary:*\n`;
       items.forEach((item, index) => {
-        message += `${index + 1}. ${item.name} (x${item.quantity}) - ₹${item.price * item.quantity}\n`;
+        const sizeText = item.size ? ` (Size: ${item.size})` : "";
+        message += `${index + 1}. ${item.name}${sizeText} (x${item.quantity}) - ₹${item.price * item.quantity}\n`;
       });
       message += `\n*Total Amount:* ₹${cartTotal}`;
+      
+      if (formData.notes) {
+        message += `\n\n*Notes/Special Instructions:*\n${formData.notes}`;
+      }
 
       // 4. Redirect to WhatsApp
       const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
@@ -141,6 +147,18 @@ export default function CheckoutClient({ whatsappNumber, user }: { whatsappNumbe
                 />
               </div>
 
+              <div>
+                <label htmlFor="notes" className="block text-sm font-medium mb-2">Order Notes / Special Instructions (Optional)</label>
+                <textarea 
+                  id="notes"
+                  rows={3}
+                  placeholder="Any specific requests? Size customizations?"
+                  className="w-full p-4 rounded-md border border-input bg-background outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                />
+              </div>
+
               <Button type="submit" className="w-full h-12 text-lg" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <><Loader2 className="mr-2 animate-spin" /> Processing...</>
@@ -171,6 +189,9 @@ export default function CheckoutClient({ whatsappNumber, user }: { whatsappNumbe
                 <div className="flex-1 flex justify-between">
                   <div>
                     <h4 className="font-semibold text-sm line-clamp-2">{item.name}</h4>
+                    {item.size && (
+                      <p className="text-muted-foreground text-xs mt-1">Size: {item.size}</p>
+                    )}
                     <p className="text-muted-foreground text-sm mt-1">Qty: {item.quantity}</p>
                   </div>
                   <div className="text-right">

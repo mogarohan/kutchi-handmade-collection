@@ -3,13 +3,15 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 export interface CartItem {
-  id: string;
+  id: string; // Unique ID for the cart item (usually slug or slug-size)
+  productId: string; // The actual UUID of the product in the database
   name: string;
   price: number;
   originalPrice?: number;
   quantity: number;
   image?: string;
   slug: string;
+  size?: string;
 }
 
 interface CartContextType {

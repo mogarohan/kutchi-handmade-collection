@@ -33,17 +33,21 @@ import { CartProvider } from "@/contexts/cart-context";
 import { CartSidebar } from "@/components/ui/cart-sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { ScrollToTop } from "@/components/layout/scroll-to-top";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${playfair.variable} h-full antialiased overflow-x-hidden`}
-    >
+      <html
+        lang="en"
+        suppressHydrationWarning
+        className={`${inter.variable} ${playfair.variable} h-full antialiased overflow-x-hidden`}
+      >
       <body className="min-h-full flex flex-col overflow-x-hidden max-w-[100vw]">
         <CartProvider>
           <ScrollToTop />
-          {children}
+          <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+            {children}
+          </ThemeProvider>
           <CartSidebar />
           <Toaster />
         </CartProvider>

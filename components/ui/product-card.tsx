@@ -9,6 +9,7 @@ import { useCart } from "@/contexts/cart-context";
 
 interface ProductCardProps {
   product: {
+    id: string;
     slug: string;
     name: string;
     original_price: number;
@@ -30,6 +31,7 @@ export function ProductCard({ product }: ProductCardProps) {
     e.stopPropagation();
     addToCart({
       id: product.slug,
+      productId: product.id,
       name: product.name,
       price: product.sale_price,
       originalPrice: product.original_price,

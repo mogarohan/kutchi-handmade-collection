@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, ShoppingCart, Users, DollarSign, ArrowRight, Plus, ListTree } from "lucide-react";
+import { Package, ShoppingCart, Users, IndianRupee, ArrowRight, Plus, ListTree } from "lucide-react";
 import Link from "next/link";
 import { getProducts } from "@/app/actions/products";
 import { getOrders } from "@/app/actions/orders";
@@ -34,7 +34,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 lg:grid-cols-3 gap-6">
-        <StatCard title="Total Revenue (Delivered)" value={`₹${totalRevenue}`} icon={<DollarSign className="text-muted-foreground" />} href="/admin/revenue" />
+        <StatCard title="Total Revenue (Delivered)" value={`₹${totalRevenue}`} icon={<IndianRupee className="text-muted-foreground" />} href="/admin/revenue" />
         <StatCard title="Total Orders" value={orderCount.toString()} icon={<ShoppingCart className="text-muted-foreground" />} href="/admin/orders" />
         <StatCard title="Products" value={productCount.toString()} icon={<Package className="text-muted-foreground" />} href="/admin/products" addAction="/admin/products/new" />
         <StatCard title="Categories" value={categoryCount.toString()} icon={<ListTree className="text-muted-foreground" />} href="/admin/categories" addAction="/admin/categories/new" />

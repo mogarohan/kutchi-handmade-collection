@@ -110,6 +110,12 @@ export default function NewProductForm({ categories = [] }: { categories: any[] 
                     <Input id="originalPrice" name="originalPrice" type="number" required placeholder="1299" />
                   </div>
                 </div>
+                
+                <div className="space-y-2 pt-4 border-t border-border mt-4">
+                  <Label htmlFor="availableSizes">Available Sizes (Optional)</Label>
+                  <Input id="availableSizes" name="availableSizes" placeholder="e.g. S, M, L, XL, Free Size" />
+                  <p className="text-xs text-muted-foreground mt-1">Enter sizes separated by commas.</p>
+                </div>
               </CardContent>
             </Card>
           </div>
