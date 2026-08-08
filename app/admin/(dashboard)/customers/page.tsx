@@ -3,6 +3,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminCustomersPage() {
   const customers = await getCustomers();
 
