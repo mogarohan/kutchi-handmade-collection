@@ -36,8 +36,9 @@ export async function getProductBySlug(slug: string) {
 }
 
 export async function addProduct(formData: FormData) {
-  const { verifyAdmin } = await import("@/lib/auth-utils");
-  await verifyAdmin();
+  try {
+    const { verifyAdmin } = await import("@/lib/auth-utils");
+    await verifyAdmin();
   
   const name = formData.get("name") as string;
   const description = formData.get("description") as string;
@@ -131,7 +132,11 @@ export async function addProduct(formData: FormData) {
   revalidatePath("/products");
   revalidatePath("/");
   
-  return { success: true };
+  return { success: true, data: { slug } };
+  } catch (err: any) {
+    console.error("Exception in addProduct:", err);
+    return { success: false, error: err.message || "An unexpected error occurred" };
+  }
 }
 
 export async function deleteProduct(id: string) {

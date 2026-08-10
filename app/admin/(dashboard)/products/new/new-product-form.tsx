@@ -23,15 +23,20 @@ export default function NewProductForm({ categories = [] }: { categories: any[] 
     e.preventDefault();
     setIsSubmitting(true);
     
-    const formData = new FormData(e.currentTarget);
-    const result = await addProduct(formData);
-    
-    setIsSubmitting(false);
-    
-    if (result.success) {
-      router.push("/admin/products");
-    } else {
-      alert("Error adding product: " + result.error);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const result = await addProduct(formData);
+      
+      if (result.success) {
+        router.push("/admin/products");
+      } else {
+        alert("Error adding product: " + result.error);
+      }
+    } catch (error: any) {
+      console.error("Action failed:", error);
+      alert("A critical error occurred while saving. Please refresh the page or login again. Details: " + error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
